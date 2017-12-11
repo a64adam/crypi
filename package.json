@@ -1,0 +1,16 @@
+{
+  "name": "Crypi",
+  "version": "1.0.0",
+  "description": "Friendly cryptocurrency value bot",
+  "main": "Client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "alyyan",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.2.1",
+    "node-cache": "^4.1.1",
+    "request": "^2.83.0"
+  }
+}
