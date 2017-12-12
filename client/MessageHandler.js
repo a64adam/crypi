@@ -1,6 +1,7 @@
 const BaseCommand = require('./command/BaseCommand');
 const CoinDetailCommand = require('./command/CoinDetailCommand');
 const HelpCommand = require('./command/HelpCommand');
+const cds = require('../data/CoinDataSource');
 
 class MessageHandler {
 
@@ -34,7 +35,7 @@ class MessageHandler {
             console.log('Valid detail command');
 
             let options = components.slice(2);
-            return new CoinDetailCommand(msg, coinName, options);
+            return new CoinDetailCommand(msg, coinName, options, cds.source);
         }
     }
 }

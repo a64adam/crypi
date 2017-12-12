@@ -1,23 +1,20 @@
 const discord = require('discord.js');
-const CoinRepository = require('../../data/CoinRepository');
+const CoinRepository = require('../../data/CoinDataSource');
 const BaseCommand = require('./BaseCommand');
 
 
 class CoinDetailCommand extends BaseCommand {
 
-    constructor(msg, coinName, options) {
+    constructor(msg, coinName, options, dataSource) {
         super(msg);
 
         this.coinName = coinName;
         this.options = options;
-
-        this.coinRepository = new CoinRepository();
+        this.dataSource = dataSource;
     }
 
     run() {
-
-
-        this.coinRepository.getCoin(this.coinName)
+        this.dataSource.getCoin(this.coinName)
             .then((coin) => {
                 console.log(coin);
 

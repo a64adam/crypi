@@ -32,4 +32,4 @@ class CoinCache {
     }
 }
 
-module.exports.cache = new CoinCache();
+module.exports = CoinCache;
