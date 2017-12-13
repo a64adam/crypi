@@ -4,15 +4,18 @@ const Coin = require('../models/Coin');
 
 const endpoint = 'https://api.coinmarketcap.com/v1/ticker/';
 
-class CoinDataSource {
+class CoinRepository {
 
     constructor() {
         this.cache = new CoinCache();
         this.symbolMap = {};
+        this.nameMap = {};
     }
 
-    fetchSymbols() {
-        request.get(endpoint, (error, response, body) => {
+    buildCoinMaps() {
+        let url = endpoint + '?limit=0';
+
+        request.get(url, (error, response, body) => {
             if (error) {
                 // TODO: Handle case where this fails...
                 return;
@@ -25,6 +28,7 @@ class CoinDataSource {
                 let coinSymbol = this._normalizeKey(jsonResponse[key].symbol);
 
                 this.symbolMap[coinSymbol] = coinName;
+                this.nameMap[coinName] = coinSymbol;
             }
 
             console.log(this.symbolMap);
@@ -84,9 +88,55 @@ class CoinDataSource {
         });
     }
 
+    getConversion(fromCoin, toCoin, amount=1) {
+        // fromCoin needs to be in name format
+        let fromCoinKey = fromCoin;
+        if (fromCoin in this.symbolMap) {
+            fromCoinKey = this.symbolMap[fromCoin];
+        }
+
+        // toCoin needs to be in symbol format
+        let toCoinSymbol = toCoin;
+        if (toCoin in this.nameMap) {
+            toCoinSymbol = this.nameMap[toCoin];
+        }
+
+        fromCoinKey = this._normalizeKey(fromCoinKey);
+        toCoinSymbol = this._normalizeKey(toCoinSymbol);
+
+        console.log(`Converting ${amount} from ${fromCoinKey} to ${toCoinSymbol}`);
+
+        let url = endpoint + fromCoinKey + `?convert=${toCoinSymbol}`;
+
+        let source = this;
+        return new Promise(function(resolve, reject) {
+            request.get(url, (error, response, body) => {
+                let json = JSON.parse(body);
+
+                if (error) {
+                    reject(error);
+                } else if (json.error) {
+                    reject(json.error);
+                } else {
+                    let coin = new Coin(json[0]);
+                    let conversionKey = `price_${toCoinSymbol}`;
+
+                    source.cache.put(coin);
+
+                    resolve({
+                        fromCoin: coin,
+                        toCoinSymbol: toCoinSymbol,
+                        fromAmount: amount,
+                        toAmount: (json[0][conversionKey] * amount)
+                    });
+                }
+            });
+        });
+    }
+
     _normalizeKey(key) {
         return key.toLowerCase();
     }
 }
 
-module.exports.source = new CoinDataSource();
+module.exports.coinRepo = new CoinRepository();

@@ -1,7 +1,7 @@
 const discord = require('discord.js');
 const handler = require('./MessageHandler');
 const auth = require('../auth.json');
-const cds = require('../data/CoinDataSource');
+const repo = require('../data/CoinRepository');
 
 const client = new discord.Client();
 
@@ -9,7 +9,7 @@ client.on('ready', () => {
     console.log(`Connected as ${client.user.tag}!`);
 
     console.log('Fetching symbols');
-    cds.source.fetchSymbols();
+    repo.coinRepo.buildCoinMaps();
 
     client.user.setPresence({
         status: 'online',

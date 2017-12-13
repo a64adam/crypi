@@ -1,7 +1,8 @@
 const BaseCommand = require('./command/BaseCommand');
 const CoinDetailCommand = require('./command/CoinDetailCommand');
+const CoinConvertCommand = require('./command/CoinConvertCommand');
 const HelpCommand = require('./command/HelpCommand');
-const cds = require('../data/CoinDataSource');
+const repo = require('../data/CoinRepository');
 
 class MessageHandler {
 
@@ -29,13 +30,15 @@ class MessageHandler {
             // Help
             return new HelpCommand(msg);
         } else if (components[2] === 'to') {
-            // TODO: Comparison operation
-            return;
+            let toCoin = components[3];
+            let amount = components[4];
+
+            return new CoinConvertCommand(repo.coinRepo, msg, coinName, toCoin, amount);
         } else {
             console.log('Valid detail command');
 
             let options = components.slice(2);
-            return new CoinDetailCommand(msg, coinName, options, cds.source);
+            return new CoinDetailCommand(repo.coinRepo, msg, coinName, options);
         }
     }
 }
