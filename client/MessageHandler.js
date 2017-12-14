@@ -4,6 +4,8 @@ const CoinConvertCommand = require('./command/CoinConvertCommand');
 const HelpCommand = require('./command/HelpCommand');
 const repo = require('../data/CoinRepository');
 
+const prefixes = ['!c', '!crypi'];
+
 class MessageHandler {
 
     /**
@@ -13,15 +15,35 @@ class MessageHandler {
      * @param msg {Message}
      * @returns {BaseCommand|void}
      */
-    static parseCommand(msg) {
-        let content = msg.content;
-        if (!(content.startsWith('!c') || content.startsWith('!crypi'))) {
+    static handleMessage(msg) {
+        if (msg.author.bot) {
+            // Ignore bot messages. Sorry, no bot-to-bot communication
+            console.log('Ignoring bot message');
             return;
         }
 
+        // Split the message
+        let content = msg.content;
+        let components = content.split(' ');
+
         console.log(`Parsing command ${content}`);
 
-        let components = content.split(' ');
+        let trigger = components[0];
+
+        // Bot was mentioned
+        if (msg.isMentioned(msg.client.user)) {
+            // Only handle if the first component was the mention
+            let userId = msg.client.user.id;
+
+            if (!(trigger.length > userId.length && trigger.substring(2, trigger.length - 1) === userId)) {
+                console.log('Mentioned but not first part of command, ignoring.');
+                return;
+            }
+        } else if (!prefixes.includes(trigger)) {
+            console.log('Ignoring irrelevant message.');
+            return;
+        }
+
         let coinName = components[1];
 
         if (components[1] === 'commands') {

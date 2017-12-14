@@ -20,7 +20,7 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-    let command = handler.parseCommand(msg);
+    let command = handler.handleMessage(msg);
     if (!command) {
         return;
     }
