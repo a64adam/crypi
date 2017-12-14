@@ -88,7 +88,7 @@ class CoinRepository {
         });
     }
 
-    getConversion(fromCoin, toCoin, amount=1) {
+    getConversion(fromCoin, toCoin, amount) {
         // fromCoin needs to be in name format
         let fromCoinKey = fromCoin;
         if (fromCoin in this.symbolMap) {
@@ -126,7 +126,7 @@ class CoinRepository {
                     resolve({
                         fromCoin: coin,
                         toCoinSymbol: toCoinSymbol,
-                        fromAmount: amount,
+                        fromAmount: parseFloat(amount),
                         toAmount: (json[0][conversionKey] * amount)
                     });
                 }
