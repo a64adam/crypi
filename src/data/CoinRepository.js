@@ -1,6 +1,6 @@
 const request = require('request');
 const CoinCache = require('./CoinCache');
-const Coin = require('../models/Coin');
+const Coin = require('../model/Coin');
 
 const endpoint = 'https://api.coinmarketcap.com/v1/ticker/';
 

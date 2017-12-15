@@ -1,6 +1,6 @@
 const discord = require('discord.js');
 const handler = require('./MessageHandler');
-const auth = require('../auth.json');
+const auth = require('../../auth.json');
 const repo = require('../data/CoinRepository');
 
 const client = new discord.Client();
