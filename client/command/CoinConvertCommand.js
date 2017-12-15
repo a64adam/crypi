@@ -10,7 +10,7 @@ class CoinConvertCommand extends BaseCommand {
         this.dataSource = dataSource;
         this.fromCoin = fromCoin;
         this.toCoin = toCoin;
-        this.amount = !isNaN(parseFloat(amount)) ? amount : 1;
+        this.amount = amount;
     }
 
     run() {

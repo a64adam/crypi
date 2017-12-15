@@ -1,7 +1,7 @@
 const BaseCommand = require('./command/BaseCommand');
 const CoinDetailCommand = require('./command/CoinDetailCommand');
 const CoinConvertCommand = require('./command/CoinConvertCommand');
-const HelpCommand = require('./command/HelpCommand');
+const CommandsComand = require('./command/CommandsComand');
 const repo = require('../data/CoinRepository');
 
 const prefixes = ['!c', '!crypi'];
@@ -22,13 +22,10 @@ class MessageHandler {
             return;
         }
 
-        // Split the message
-        let content = msg.content;
-        let components = content.split(' ');
+        console.log(`Parsing command ${msg.content}`);
 
-        console.log(`Parsing command ${content}`);
-
-        let trigger = components[0];
+        let trigger, command, args;
+        [trigger, command, ...args] = msg.content.split(' ');
 
         // Bot was mentioned
         if (msg.isMentioned(msg.client.user)) {
@@ -44,23 +41,32 @@ class MessageHandler {
             return;
         }
 
-        let coinName = components[1];
+        if ('convert' === command) {
+            let toSymbol, fromSymbol;
+            let amount = 1.0;
 
-        if (components[1] === 'commands') {
-            console.log('Valid help command');
+            if (!isNaN(parseFloat(args[0])) && args.length >= 4) {
+                // Command: <amount> <symbol> to <symbol>
+                amount = parseFloat(args[0]);
+                fromSymbol = args[1];
+                toSymbol = args[3];
+            } else if (args.length >= 3) {
+                // Command: <symbol> to <symbol>
+                fromSymbol = args[0];
+                toSymbol = args[2];
+            } else {
+                // Invalid convert command
+                console.log('Invalid convert command');
+                return null;
+            }
 
-            // Help
-            return new HelpCommand(msg);
-        } else if (components[2] === 'to') {
-            let toCoin = components[3];
-            let amount = components[4];
-
-            return new CoinConvertCommand(repo.coinRepo, msg, coinName, toCoin, amount);
+            return new CoinConvertCommand(repo.coinRepo, msg, fromSymbol, toSymbol, amount);
+        } else if ('commands' === command) {
+            // Commands command
+            return new CommandsComand(msg);
         } else {
-            console.log('Valid detail command');
-
-            let options = components.slice(2);
-            return new CoinDetailCommand(repo.coinRepo, msg, coinName, options);
+            // Coin details command, 'command' is the coin symbol
+            return new CoinDetailCommand(repo.coinRepo, msg, command, args);
         }
     }
 }

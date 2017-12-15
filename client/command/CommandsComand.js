@@ -1,0 +1,21 @@
+const discord = require('discord.js');
+const BaseCommand = require('./BaseCommand');
+
+class CommandsCommand extends BaseCommand {
+
+    constructor(msg) {
+        super(msg);
+    }
+
+    run() {
+        let embed = new discord.RichEmbed()
+            .setTitle('Crypi Commands')
+            .setDescription('All available are listed below. **[]** indicates optional fields.')
+            .addField('!crypi <symbol> [options]', 'Information about the provided symbol\n\n**Options**\nchange: 1H, 24H & 7D price changes')
+            .addField('!crypi convert [amount] <symbol> to <symbol>', 'Converts the first symbol to the second symbol. Amount defaults to 1.0.')
+
+        this.msg.channel.send(embed);
+    }
+}
+
+module.exports = CommandsCommand;
