@@ -24,8 +24,9 @@ class MessageHandler {
 
         console.log(`Parsing command ${msg.content}`);
 
+        let content = msg.content.toLowerCase();
         let trigger, command, args;
-        [trigger, command, ...args] = msg.content.split(' ');
+        [trigger, command, ...args] = content.split(' ');
 
         // Bot was mentioned
         if (msg.isMentioned(msg.client.user)) {

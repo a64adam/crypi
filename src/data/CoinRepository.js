@@ -8,8 +8,8 @@ class CoinRepository {
 
     constructor() {
         this.cache = new CoinCache();
-        this.symbolMap = {};
-        this.nameMap = {};
+        this.symbolToIdMap = {};
+        this.nameToIdMap = {};
     }
 
     buildCoinMaps() {
@@ -24,14 +24,13 @@ class CoinRepository {
             let jsonResponse = JSON.parse(body);
 
             for (let key in jsonResponse) {
-                let coinName = this._normalizeKey(jsonResponse[key].name);
-                let coinSymbol = this._normalizeKey(jsonResponse[key].symbol);
+                let coinId = jsonResponse[key].id;
+                let coinName = this._normalize(jsonResponse[key].name);
+                let coinSymbol = this._normalize(jsonResponse[key].symbol);
 
-                this.symbolMap[coinSymbol] = coinName;
-                this.nameMap[coinName] = coinSymbol;
+                this.symbolToIdMap[coinSymbol] = coinId;
+                this.nameToIdMap[coinName] = coinId;
             }
-
-            console.log(this.symbolMap);
         });
     }
 
@@ -42,26 +41,24 @@ class CoinRepository {
      * @returns {Promise<Coin>}
      */
     getCoin(coinName) {
-        let symbolMap = this.symbolMap;
         let cache = this.cache;
 
-        let key = this._normalizeKey(coinName);
+        let id = this._getId(coinName);
+        console.log(`Returned id: ${id}`);
 
         return new Promise(function (resolve, reject) {
-            // Check if the user passed in the symbol and map it to the coin name
-            if (key in symbolMap) {
-                key = symbolMap[key];
-                console.log(`Found a symbol match, key is now ${key}`);
+            if (!id) {
+                reject();
             }
 
             // Check cache first
-            let coin = cache.get(key);
+            let coin = cache.get(id);
 
             // If miss, hit network
             if (!coin) {
-                console.log(`Cache miss for ${key}`);
+                console.log(`Cache miss for ${id}`);
 
-                const url = endpoint + key;
+                const url = endpoint + id;
                 console.log(`Fetching data from: ${url}`);
 
                 request.get(url, (error, response, body) => {
@@ -82,34 +79,30 @@ class CoinRepository {
                     }
                 });
             } else {
-                console.log(`Cache hit for ${key}`);
+                console.log(`Cache hit for ${id}`);
                 resolve(coin);
             }
         });
     }
 
     getConversion(fromCoin, toCoin, amount) {
-        // fromCoin needs to be in name format
-        let fromCoinKey = fromCoin;
-        if (fromCoin in this.symbolMap) {
-            fromCoinKey = this.symbolMap[fromCoin];
-        }
+        // fromCoin needs to be in id format
+        let fromCoinId = this._getId(fromCoin);
 
         // toCoin needs to be in symbol format
-        let toCoinSymbol = toCoin;
-        if (toCoin in this.nameMap) {
-            toCoinSymbol = this.nameMap[toCoin];
-        }
-
-        fromCoinKey = this._normalizeKey(fromCoinKey);
-        toCoinSymbol = this._normalizeKey(toCoinSymbol);
-
-        console.log(`Converting ${amount} from ${fromCoinKey} to ${toCoinSymbol}`);
-
-        let url = endpoint + fromCoinKey + `?convert=${toCoinSymbol}`;
+        let toCoinSymbol = this._getSymbol(toCoin);
 
         let source = this;
         return new Promise(function(resolve, reject) {
+            if (!fromCoinId || !toCoinSymbol) {
+                reject();
+            }
+
+            console.log(`Converting ${amount} from ${fromCoinId} to ${toCoinSymbol}`);
+
+            let url = endpoint + fromCoinId + `?convert=${toCoinSymbol}`;
+            console.log(`Fetching data from: ${url}`);
+
             request.get(url, (error, response, body) => {
                 let json = JSON.parse(body);
 
@@ -134,8 +127,38 @@ class CoinRepository {
         });
     }
 
-    _normalizeKey(key) {
-        return key.toLowerCase();
+    _getId(input) {
+        let key = this._normalize(input);
+
+        if (key in this.symbolToIdMap) {
+            key = this.symbolToIdMap[key];
+        } else if (key in this.nameToIdMap) {
+            key = this.nameToIdMap[key];
+        } else {
+            // If the key isn't in either map, then it doesn't exist (with our source at least)
+            key = null;
+        }
+
+        return key;
+    }
+
+    _getSymbol(input) {
+        let key = this._normalize(input);
+
+        // If the key exists in the name map, let's first get the id
+        if (key in this.nameToIdMap) {
+            key = this.nameToIdMap[key];
+        }
+
+        if (!(key in this.symbolToIdMap)) {
+            key = Object.keys(this.symbolToIdMap).find(k => this.symbolToIdMap[k] === key);
+        }
+
+        return key;
+    }
+
+    _normalize(input) {
+        return input.toLowerCase().replace(/[^A-Za-z0-9]/gi, '');
     }
 }
 

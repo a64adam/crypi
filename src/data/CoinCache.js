@@ -19,16 +19,16 @@ class CoinCache {
         let now = new Date();
         let diff = (nextUpdate - now) / 1000;
 
-        console.log(`Added key [${coin.name}] with ttl of ${diff}s`);
-        this.cache.set(coin.name.toLowerCase(), coin, Math.max(1, diff));
+        console.log(`Added key [${coin.id}] with ttl of ${diff}s`);
+        this.cache.set(coin.id.toLowerCase(), coin, Math.max(1, diff));
     }
 
     /**
-     * @param coinName (StringResolvable}
+     * @param coinId (StringResolvable}
      * @returns {Coin|false}
      */
-    get(coinName) {
-        return this.cache.get(coinName.toLowerCase());
+    get(coinId) {
+        return this.cache.get(coinId.toLowerCase());
     }
 }
 

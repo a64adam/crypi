@@ -5,6 +5,7 @@ class Coin {
             return obj;
         }
 
+        this.id = obj.id;
         this.name = obj.name;
         this.symbol = obj.symbol;
         this.priceUSD = obj.price_usd;
