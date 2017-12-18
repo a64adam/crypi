@@ -1,7 +1,9 @@
 const BaseCommand = require('./command/BaseCommand');
 const CoinDetailCommand = require('./command/CoinDetailCommand');
 const CoinConvertCommand = require('./command/CoinConvertCommand');
-const CommandsComand = require('./command/CommandsComand');
+const CommandsCommand = require('./command/CommandsComand');
+const HelpCommand = require('./command/HelpCommand');
+const EmptyCommand = require('./command/EmptyCommand');
 const repo = require('../data/CoinRepository');
 
 const prefixes = ['!c', '!crypi'];
@@ -42,7 +44,12 @@ class MessageHandler {
             return;
         }
 
-        if ('convert' === command) {
+        console.log(command);
+
+        if (!command) {
+            console.log('empty');
+            return new EmptyCommand(msg);
+        } else if ('convert' === command) {
             let toSymbol, fromSymbol;
             let amount = 1.0;
 
@@ -62,9 +69,11 @@ class MessageHandler {
             }
 
             return new CoinConvertCommand(repo.coinRepo, msg, fromSymbol, toSymbol, amount);
-        } else if ('commands' === command) {
+        } else if ('commands' === command || 'command' === command) {
             // Commands command
-            return new CommandsComand(msg);
+            return new CommandsCommand(msg);
+        } else if ('help' === command) {
+            return new HelpCommand(msg);
         } else {
             // Coin details command, 'command' is the coin symbol
             return new CoinDetailCommand(repo.coinRepo, msg, command, args);

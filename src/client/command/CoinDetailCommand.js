@@ -1,5 +1,6 @@
-const discord = require('discord.js');
+const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
+const Constants = require('../../util/Constants');
 
 
 class CoinDetailCommand extends BaseCommand {
@@ -43,8 +44,8 @@ class CoinDetailCommand extends BaseCommand {
      * @returns {"discord.js".RichEmbed}
      */
     _buildBaseRepsonse(coin) {
-        return new discord.RichEmbed()
-            .setColor('#FF9900')
+        return new Discord.RichEmbed()
+            .setColor(Constants.EmbedOptions.color)
             .setFooter(`Last updated: ${coin.lastUpdated.toUTCString()}`);
     }
 
