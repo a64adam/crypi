@@ -4,8 +4,10 @@ const CoinConvertCommand = require('./command/CoinConvertCommand');
 const CommandsCommand = require('./command/CommandsComand');
 const HelpCommand = require('./command/HelpCommand');
 const EmptyCommand = require('./command/EmptyCommand');
+const logger = require('../util/Logger');
 const repo = require('../data/CoinRepository');
 
+const tag = 'MessageHandler';
 const prefixes = ['!c', '!crypi'];
 
 class MessageHandler {
@@ -20,11 +22,8 @@ class MessageHandler {
     static handleMessage(msg) {
         if (msg.author.bot) {
             // Ignore bot messages. Sorry, no bot-to-bot communication
-            console.log('Ignoring bot message');
             return;
         }
-
-        console.log(`Parsing command ${msg.content}`);
 
         let content = msg.content.toLowerCase();
         let trigger, command, args;
@@ -36,18 +35,17 @@ class MessageHandler {
             let userId = msg.client.user.id;
 
             if (!(trigger.length > userId.length && trigger.substring(2, trigger.length - 1) === userId)) {
-                console.log('Mentioned but not first part of command, ignoring.');
+                logger.verbose(`${logger.createTag(tag, msg.id)} Ignoring bot @mention. Not used as trigger.`);
                 return;
             }
         } else if (!prefixes.includes(trigger)) {
-            console.log('Ignoring irrelevant message.');
+            logger.verbose(`${logger.createTag(tag, msg.id)} Message does not contain valid trigger, ignoring.`);
             return;
         }
 
-        console.log(command);
+        logger.info(`${logger.createTag(tag, msg.id)} Parsing message, [trigger: ${trigger}, command: ${command}, args: ${args}]`);
 
         if (!command) {
-            console.log('empty');
             return new EmptyCommand(msg);
         } else if ('convert' === command) {
             let toSymbol, fromSymbol;
@@ -64,7 +62,6 @@ class MessageHandler {
                 toSymbol = args[2];
             } else {
                 // Invalid convert command
-                console.log('Invalid convert command');
                 return null;
             }
 

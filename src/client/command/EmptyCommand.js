@@ -1,6 +1,10 @@
 const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
+const logger = require('../../util/Logger');
+
+const tag = 'EmptyCommand';
+
 
 class EmptyCommand extends BaseCommand {
 
@@ -9,6 +13,8 @@ class EmptyCommand extends BaseCommand {
     }
 
     run() {
+        logger.info(`${logger.createTag(tag, msg.id)} Executing command.`);
+
         let embed = new Discord.RichEmbed()
             .setTitle('Crypi')
             .setDescription(`Hi! I'm a friendly **Cryptocurrency** bot that provides **prices** and **conversions**.`)
@@ -17,6 +23,7 @@ class EmptyCommand extends BaseCommand {
 
         this._appendBotStats(embed);
 
+        logger.info(`${logger.createTag(tag, msg.id)} Completed command.`);
         this.msg.channel.send(embed);
     }
 

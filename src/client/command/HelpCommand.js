@@ -2,7 +2,9 @@ const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
 
+const tag = 'HelpCommand';
 const inviteURL = 'https://discordapp.com/api/oauth2/authorize?client_id=389202458452295680&permissions=83968&scope=bot';
+
 
 class HelpCommand extends BaseCommand {
 
@@ -11,6 +13,7 @@ class HelpCommand extends BaseCommand {
     }
 
     run() {
+        logger.info(`${logger.createTag(tag, msg.id)} Executing command.`);
 
         let inviteTitle = 'Invite';
         let inviteText = `Click **[here](${inviteURL})** to invite Crypi to **your** server!`;
@@ -29,6 +32,7 @@ class HelpCommand extends BaseCommand {
             .addField(commandsTitle, commandsText)
             .addField(helpTitle, helpText);
 
+        logger.info(`${logger.createTag(tag, msg.id)} Completed command.`);
         this.msg.channel.send(embed);
     }
 }

@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
+const logger = require('../../util/Logger');
+
+const tag = 'CoinDetailCommand';
 
 
 class CoinDetailCommand extends BaseCommand {
@@ -14,10 +17,10 @@ class CoinDetailCommand extends BaseCommand {
     }
 
     run() {
+        logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
+
         this.dataSource.getCoin(this.coinName)
             .then((coin) => {
-                console.log(coin);
-
                 let embed = this._buildBaseRepsonse(coin);
                 this._appendPriceData(embed, coin);
 
@@ -29,11 +32,12 @@ class CoinDetailCommand extends BaseCommand {
                     this._appendVolumeData(embed, coin);
                 }
 
+                logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
+
                 this.msg.channel.send(embed);
             })
             .catch((error) => {
-                console.error(error);
-
+                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: [${error}]`);
                 this.msg.channel.send("Boo! I couldn't find that coin.");
             });
     }

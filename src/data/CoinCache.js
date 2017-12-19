@@ -1,4 +1,7 @@
 const NodeCache = require('node-cache');
+const logger = require('../util/Logger');
+
+const tag = '[CoinCache]';
 
 
 class CoinCache {
@@ -19,7 +22,7 @@ class CoinCache {
         let now = new Date();
         let diff = (nextUpdate - now) / 1000;
 
-        console.log(`Added key [${coin.id}] with ttl of ${diff}s`);
+        logger.info(`${tag} Added coin: [id: ${coin.id}, ttl: ${diff}s]`);
         this.cache.set(coin.id.toLowerCase(), coin, Math.max(1, diff));
     }
 

@@ -1,14 +1,17 @@
-const discord = require('discord.js');
+const Discord = require('discord.js');
+const logger = require('../util/Logger');
+
 const handler = require('./MessageHandler');
 const auth = require('../../auth.json');
 const repo = require('../data/CoinRepository');
 
-const client = new discord.Client();
+const tag = '[Client]';
+
+const client = new Discord.Client();
 
 client.on('ready', () => {
-    console.log(`Connected as ${client.user.tag}!`);
+    logger.info(`${tag} Connected as ${client.user.tag}!`);
 
-    console.log('Fetching symbols');
     repo.coinRepo.buildCoinMaps();
 
     client.user.setPresence({
@@ -16,6 +19,10 @@ client.on('ready', () => {
         game: {
             name: '!c commands'
         }
+    }).then(() => {
+        logger.info(`${tag} Successfully set presence.`);
+    }).catch(() => {
+        logger.warn(`${tag} Failed to set presence`);
     });
 });
 
