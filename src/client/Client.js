@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const logger = require('../util/Logger');
 
 const handler = require('./MessageHandler');
-const auth = require('../../auth.json');
+const auth = require('../../config/auth');
 const repo = require('../data/CoinRepository');
 
 const tag = '[Client]';

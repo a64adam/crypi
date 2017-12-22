@@ -1,8 +1,30 @@
 const winston = require('winston');
+const CloudWatchTransport = require('winston-cloudwatch');
+
+const crypto = require('crypto');
+const awsConfig = require('../../config/aws_credentials');
+
+let startTime = new Date().toISOString();
 
 let config = winston.config;
+let cloudWatchConfig = {
+    logGroupName: awsConfig.logGroupName,
+    logStreamName: function() {
+        // Spread log streams across dates as the server stays up
+        let date = new Date().toISOString().split('T')[0];
+        return 'crypi-bot-' + date + '-' +
+            crypto.createHash('md5')
+                .update(startTime)
+                .digest('hex');
+    },
+    createLogGroup: false,
+    createLogStream: true,
+    awsAccessKeyId: awsConfig.accessKeyId,
+    awsSecretKey: awsConfig.secretAccessKey,
+    awsRegion: awsConfig.region,
+};
 
-module.exports = new (winston.Logger)({
+let logger = new (winston.Logger)({
     exitOnError: false,
     transports: [
         new (winston.transports.Console)({
@@ -20,6 +42,9 @@ module.exports = new (winston.Logger)({
     ]
 });
 
+logger.add(CloudWatchTransport, cloudWatchConfig);
+
+module.exports = logger;
 module.exports.createTag = function(tag, id) {
     return `[${tag}:${id}]`;
 };
