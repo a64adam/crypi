@@ -22,9 +22,9 @@ class CoinConvertCommand extends BaseCommand {
 
         this.dataSource.getConversion(this.fromCoin, this.toCoin, this.amount)
             .then((conversion) => {
-                let fromAmount = conversion.fromAmount.toLocaleString();
+                let fromAmount = conversion.fromAmount.toString();
                 let fromSymbol = conversion.fromCoin.symbol.toUpperCase();
-                let toAmount = conversion.toAmount.toFixed(4).toLocaleString();
+                let toAmount = conversion.toAmount.toFixed(8).toString();
                 let toSymbol = conversion.toCoinSymbol.toUpperCase();
 
                 let embed = this._buildBaseResponse(conversion.fromCoin)
