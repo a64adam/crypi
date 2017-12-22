@@ -87,7 +87,7 @@ class CoinRepository {
                         // Successful
                         coin = new Coin(json[0]);
 
-                        logger.info(`${tag} Successfully fetched metadata! [${JSON.stringify(coin)}]`);
+                        logger.info(`${tag} Successfully fetched metadata: `, coin);
 
                         cache.put(coin);
                         resolve(new Coin(json[0]));
@@ -95,7 +95,7 @@ class CoinRepository {
                 });
             } else {
                 console.log(`Cache hit for ${id}`);
-                logger.info(`${tag} Cache Hit: [${JSON.stringify(coin)}]`);
+                logger.info(`${tag} Cache Hit: `, coin);
                 resolve(coin);
             }
         });
@@ -142,7 +142,7 @@ class CoinRepository {
                         toAmount: (json[0][conversionKey] * amount)
                     };
 
-                    logger.info(`${tag} Successfully fetched conversion data! [${JSON.stringify(data)}]`);
+                    logger.info(`${tag} Successfully fetched conversion data: `, data);
                     resolve(data);
                 }
             });

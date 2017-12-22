@@ -1,21 +1,22 @@
-const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, printf } = format;
+const winston = require('winston');
 
+let config = winston.config;
 
-const defaultFormat = printf(info => {
-    return `${info.timestamp} ${info.level}: ${info.message}`;
-});
-
-module.exports = createLogger({
-    format: combine(
-        timestamp(),
-        defaultFormat
-    ),
+module.exports = new (winston.Logger)({
+    exitOnError: false,
     transports: [
-        new transports.Console({
+        new (winston.transports.Console)({
             level: 'silly',
-            colorize: true
-        }),
+            timestamp: function() {
+                return Date.now();
+            },
+            formatter: function(options) {
+                return options.timestamp() + ' ' +
+                    config.colorize(options.level, options.level.toUpperCase()) + ' ' +
+                    (options.message ? options.message : '') +
+                    (options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
+            }
+        })
     ]
 });
 

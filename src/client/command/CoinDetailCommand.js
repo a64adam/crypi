@@ -37,7 +37,7 @@ class CoinDetailCommand extends BaseCommand {
                 this.msg.channel.send(embed);
             })
             .catch((error) => {
-                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: [${error}]`);
+                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: `, error);
                 this.msg.channel.send("Boo! I couldn't find that coin.");
             });
     }
