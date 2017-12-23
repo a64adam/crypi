@@ -13,7 +13,7 @@ class CommandsCommand extends BaseCommand {
     }
 
     run() {
-        logger.info(`${logger.createTag(tag, msg.id)} Executing command.`);
+        logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         let embed = new Discord.RichEmbed()
             .setTitle('Crypi Commands')
@@ -22,7 +22,7 @@ class CommandsCommand extends BaseCommand {
             .addField('!crypi <symbol> [options]', 'Information about the provided symbol\n\n**Options**\nchange: 1H, 24H & 7D price changes')
             .addField('!crypi convert [amount] <symbol> to <symbol>', 'Converts the first symbol to the second symbol. Amount defaults to 1.0.')
 
-        logger.info(`${logger.createTag(tag, msg.id)} Completed command.`);
+        logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
         this.msg.channel.send(embed);
     }
 }

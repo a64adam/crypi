@@ -13,7 +13,7 @@ class EmptyCommand extends BaseCommand {
     }
 
     run() {
-        logger.info(`${logger.createTag(tag, msg.id)} Executing command.`);
+        logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         let embed = new Discord.RichEmbed()
             .setTitle('Crypi')
@@ -23,7 +23,7 @@ class EmptyCommand extends BaseCommand {
 
         this._appendBotStats(embed);
 
-        logger.info(`${logger.createTag(tag, msg.id)} Completed command.`);
+        logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
         this.msg.channel.send(embed);
     }
 
