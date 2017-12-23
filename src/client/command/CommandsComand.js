@@ -19,7 +19,7 @@ class CommandsCommand extends BaseCommand {
             .setTitle('Crypi Commands')
             .setColor(Constants.EmbedOptions.color)
             .setDescription('All available are listed below. **[]** indicates optional fields.')
-            .addField('!crypi <symbol> [options]', 'Information about the provided symbol\n\n**Options**\nchange: 1H, 24H & 7D price changes')
+            .addField('!crypi <symbol>', 'Price information about the provided symbol')
             .addField('!crypi convert [amount] <symbol> to <symbol>', 'Converts the first symbol to the second symbol. Amount defaults to 1.0.')
 
         logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
