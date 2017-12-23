@@ -23,11 +23,11 @@ class CoinConvertCommand extends BaseCommand {
         this.dataSource.getConversion(this.fromCoin, this.toCoin, this.amount)
             .then((conversion) => {
                 let fromAmount = conversion.fromAmount.toString();
-                let fromSymbol = conversion.fromCoin.symbol.toUpperCase();
+                let fromSymbol = conversion.fromCoinSymbol.toUpperCase();
                 let toAmount = conversion.toAmount.toFixed(8).toString();
                 let toSymbol = conversion.toCoinSymbol.toUpperCase();
 
-                let embed = this._buildBaseResponse(conversion.fromCoin)
+                let embed = this._buildBaseResponse(conversion.lastUpdated)
                     .addField('Conversion', `\`${fromAmount}\` **${fromSymbol}** = \`${toAmount}\` **${toSymbol}**`);
 
                 logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`)
@@ -35,20 +35,20 @@ class CoinConvertCommand extends BaseCommand {
                 this.msg.channel.send(embed);
             })
             .catch((error) => {
-                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: `, error);
+                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: ${error}`,);
                 this.msg.channel.send("Sorry! I'm not sure how to do that conversion.");
             });
     }
 
     /**
      * @private
-     * @param coin {Coin}
+     * @param lastUpdated {StringResolvable}
      * @returns {"discord.js".RichEmbed}
      */
-    _buildBaseResponse(coin) {
+    _buildBaseResponse(lastUpdated) {
         return new Discord.RichEmbed()
             .setColor(Constants.EmbedOptions.color)
-            .setFooter(`Last updated: ${coin.lastUpdated.toUTCString()}`);
+            .setFooter(`Last updated: ${lastUpdated.toUTCString()}`);
     }
 }
 

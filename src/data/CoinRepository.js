@@ -6,6 +6,11 @@ const Coin = require('../model/Coin');
 const tag = '[CoinRepository]';
 const endpoint = 'https://api.coinmarketcap.com/v1/ticker/';
 
+const ConversionType = Object.freeze({
+    FIAT_TO_CRYPTO: Symbol("fiatToCrypto"),
+    CRYPTO_TO_FIAT: Symbol("cryptoToFiat")
+});
+
 class CoinRepository {
 
     constructor() {
@@ -102,11 +107,25 @@ class CoinRepository {
     }
 
     getConversion(fromCoin, toCoin, amount) {
-        // fromCoin needs to be in id format
-        let fromCoinId = this._getId(fromCoin);
+        let type = !(this._normalize(fromCoin) in this.symbolToIdMap) ?
+            ConversionType.FIAT_TO_CRYPTO :
+            ConversionType.CRYPTO_TO_FIAT;
 
-        // toCoin needs to be in symbol format
-        let toCoinSymbol = this._getSymbol(toCoin);
+        let fromCoinId; // fromCoin needs to be in id format
+        let toCoinSymbol; // toCoin needs to be in symbol format
+
+        switch(type) {
+            case ConversionType.CRYPTO_TO_FIAT:
+                fromCoinId = this._getId(fromCoin);
+                toCoinSymbol = this._getSymbol(toCoin);
+                break;
+            case ConversionType.FIAT_TO_CRYPTO:
+                // endpoint requires cryptocurrency as the fromCoin type, so invert them here and we'll do the math
+                // to reverse the conversion once we get the result
+                fromCoinId = this._getId(toCoin);
+                toCoinSymbol = this._normalize(fromCoin);
+                break;
+        }
 
         logger.info(`${tag} Converting ${amount} fromCoin: [input: ${fromCoin}, id: ${fromCoinId}] to toCoin: [input: ${toCoin}, symbol: ${toCoinSymbol}]`);
 
@@ -135,11 +154,22 @@ class CoinRepository {
 
                     source.cache.put(coin);
 
+                    let fromCoinSymbol, toAmount;
+                    if (type === ConversionType.CRYPTO_TO_FIAT) {
+                        fromCoinSymbol = coin.symbol;
+                        toAmount = (json[0][conversionKey] * amount);
+                    } else {
+                        fromCoinSymbol = toCoinSymbol;
+                        toCoinSymbol = coin.symbol;
+                        toAmount = (amount / json[0][conversionKey]);
+                    }
+
                     let data = {
-                        fromCoin: coin,
+                        fromCoinSymbol: fromCoinSymbol,
                         toCoinSymbol: toCoinSymbol,
                         fromAmount: parseFloat(amount),
-                        toAmount: (json[0][conversionKey] * amount)
+                        toAmount: toAmount,
+                        lastUpdated: coin.lastUpdated
                     };
 
                     logger.info(`${tag} Successfully fetched conversion data: `, data);
