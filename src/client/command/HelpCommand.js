@@ -2,9 +2,10 @@ const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
 const logger = require('../../util/Logger');
+const auth = require('../../../config/auth');
 
 const tag = 'HelpCommand';
-const inviteURL = 'https://discordapp.com/api/oauth2/authorize?client_id=389202458452295680&permissions=83968&scope=bot';
+const inviteURL = `https://discordapp.com/api/oauth2/authorize?client_id=${auth.clientId}&permissions=2112&scope=bot`;
 
 
 class HelpCommand extends BaseCommand {
