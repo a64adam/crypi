@@ -28,7 +28,7 @@ class CoinConvertCommand extends BaseCommand {
                 let toSymbol = conversion.toCoinSymbol.toUpperCase();
 
                 let embed = this._buildBaseResponse(conversion.fromCoin)
-                    .addField('Conversion', `${fromAmount} **${fromSymbol}** = ${toAmount} **${toSymbol}**`);
+                    .addField('Conversion', `\`${fromAmount}\` **${fromSymbol}** = \`${toAmount}\` **${toSymbol}**`);
 
                 logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`)
 

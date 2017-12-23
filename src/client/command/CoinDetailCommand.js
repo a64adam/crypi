@@ -5,7 +5,6 @@ const logger = require('../../util/Logger');
 
 const tag = 'CoinDetailCommand';
 
-
 class CoinDetailCommand extends BaseCommand {
 
     constructor(dataSource, msg, coinName, options) {
@@ -21,20 +20,18 @@ class CoinDetailCommand extends BaseCommand {
 
         this.dataSource.getCoin(this.coinName)
             .then((coin) => {
-                let embed = this._buildBaseRepsonse(coin);
-                this._appendPriceData(embed, coin);
-
-                if (this.options.includes('change')) {
-                    this._appendChangeData(embed, coin);
+                let percentChange = coin.percentChangeDay;
+                if (percentChange[0] !== '-') {
+                    percentChange = '+' + percentChange;
                 }
 
-                if (this.options.includes('volume')) {
-                    this._appendVolumeData(embed, coin);
-                }
-
-                logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
+                let embed = this._buildBaseRepsonse(coin)
+                    .addField(`\`${coin.priceUSD}\` USD`, `Price`, true)
+                    .addField(`\`${percentChange}\`%`, 'Change (24h)', true);
 
                 this.msg.channel.send(embed);
+
+                logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
             })
             .catch((error) => {
                 logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: `, error);
@@ -48,41 +45,16 @@ class CoinDetailCommand extends BaseCommand {
      * @returns {"discord.js".RichEmbed}
      */
     _buildBaseRepsonse(coin) {
+        let title = `${coin.name} (${coin.symbol})`;
+
+        let color = coin.percentChangeDay[0] === '-' ?
+            Constants.EmbedOptions.negativeColor :
+            Constants.EmbedOptions.positiveColor;
+
         return new Discord.RichEmbed()
-            .setColor(Constants.EmbedOptions.color)
+            .setColor(color)
+            .setTitle(title)
             .setFooter(`Last updated: ${coin.lastUpdated.toUTCString()}`);
-    }
-
-    /**
-     * @private
-     * @param embed {"discord.js".RichEmbed}
-     * @param coin {Coin}
-     */
-    _appendPriceData(embed, coin) {
-        return embed.addField(coin.name, `**Price (USD)**: $${coin.priceUSD}`, false)
-    }
-
-    /**
-     * @private
-     * @param embed {"discord.js".RichEmbed}
-     * @param coin {Coin}
-     * @returns {"discord.js".RichEmbed}
-     */
-    _appendChangeData(embed, coin) {
-        return embed
-            .addField('1H', `${coin.percentChangeHour}%`, true)
-            .addField('24H', `${coin.percentChangeDay}%`, true)
-            .addField('7D', `${coin.percentChangeWeek}%`, true);
-    }
-
-    /**
-     * @private
-     * @param embed {"discord.js".RichEmbed}
-     * @param coin {Coin}
-     * @returns {"discord.js".RichEmbed}
-     */
-    _appendVolumeData(embed, coin) {
-
     }
 }
 
