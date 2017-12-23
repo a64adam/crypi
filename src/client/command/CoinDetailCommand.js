@@ -26,8 +26,8 @@ class CoinDetailCommand extends BaseCommand {
                 }
 
                 let embed = this._buildBaseRepsonse(coin)
-                    .addField(`\`${coin.priceUSD}\` USD`, `Price`, true)
-                    .addField(`\`${percentChange}\`%`, 'Change (24h)', true);
+                    .addField(`${coin.priceUSD} USD`, `Price`, true)
+                    .addField(`${percentChange}%`, 'Change (24h)', true);
 
                 this.msg.channel.send(embed);
 
