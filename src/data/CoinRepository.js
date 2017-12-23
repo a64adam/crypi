@@ -181,8 +181,14 @@ class CoinRepository {
 
         if (!(key in this.symbolToIdMap)) {
             logger.silly(`${tag} Searching symbol map values for match.`);
-            key = Object.keys(this.symbolToIdMap).find(k => this.symbolToIdMap[k] === key);
-            logger.silly(`${tag} Found key in reverse symbol map lookup: [key: ${key}]`);
+
+            let searchKey = Object.keys(this.symbolToIdMap).find(k => this.symbolToIdMap[k] === key);
+            if (searchKey) {
+                logger.silly(`${tag} Found key in reverse symbol map lookup: [key: ${key}]`);
+                key = searchKey;
+            } else {
+                logger.silly(`${tag} Did not find key in reverse symbol map lookup.`);
+            }
         }
 
         logger.silly(`${tag} symbol is: [${input}: ${key}]`);
@@ -190,7 +196,7 @@ class CoinRepository {
     }
 
     _normalize(input) {
-        return input.toLowerCase().replace(/[^A-Za-z0-9]/gi, '');
+        return input.toLowerCase().replace(/[^A-Za-z0-9$]/gi, '');
     }
 }
 
