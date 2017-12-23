@@ -45,7 +45,7 @@ class MessageHandler {
 
         logger.info(`${logger.createTag(tag, msg.id)} Parsing message, [trigger: ${trigger}, command: ${command}, args: ${args}]`);
 
-        if (!command) {
+        if (!command || 'info' === command) {
             return new EmptyCommand(msg);
         } else if ('convert' === command) {
             let toSymbol, fromSymbol;
