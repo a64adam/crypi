@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
+const IconUtil = require('../../util/IconUtil');
 const logger = require('../../util/Logger');
 
 const tag = 'CoinDetailCommand';
@@ -46,6 +47,11 @@ class CoinDetailCommand extends BaseCommand {
      */
     _buildBaseRepsonse(coin) {
         let title = `${coin.name} (${coin.symbol})`;
+
+        let coinIcon = IconUtil.iconForSymbol(this.msg.client, coin.symbol);
+        if (coinIcon) {
+            title = `${coinIcon} ${title}`;
+        }
 
         let color = coin.percentChangeDay[0] === '-' ?
             Constants.EmbedOptions.negativeColor :

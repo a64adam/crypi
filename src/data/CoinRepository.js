@@ -164,6 +164,10 @@ class CoinRepository {
                         toAmount = (amount / json[0][conversionKey]);
                     }
 
+                    if (!toAmount) {
+                        reject('Error with toAmount, NaN!');
+                    }
+
                     let data = {
                         fromCoinSymbol: fromCoinSymbol,
                         toCoinSymbol: toCoinSymbol,
