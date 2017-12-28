@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
-const IconUtil = require('../../util/IconUtil');
+const Util = require('../../util/Util');
 const logger = require('../../util/Logger');
 
 const tag = 'CoinConvertCommand';
@@ -18,7 +18,7 @@ class CoinConvertCommand extends BaseCommand {
         this.amount = amount;
     }
 
-    run() {
+    run(options = {}) {
         logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         this.dataSource.getConversion(this.fromCoin, this.toCoin, this.amount)
@@ -28,8 +28,8 @@ class CoinConvertCommand extends BaseCommand {
                 let toAmount = conversion.toAmount.toFixed(8).toString();
                 let toSymbol = conversion.toCoinSymbol.toUpperCase();
 
-                let fromSymbolIcon = IconUtil.iconForSymbol(this.msg.client, conversion.fromCoinSymbol);
-                let toSymbolIcon = IconUtil.iconForSymbol(this.msg.client, conversion.toCoinSymbol);
+                let fromSymbolIcon = Util.iconForSymbol(this.msg.client, conversion.fromCoinSymbol);
+                let toSymbolIcon = Util.iconForSymbol(this.msg.client, conversion.toCoinSymbol);
 
                 let title = fromSymbolIcon && toSymbolIcon ? `${fromSymbolIcon} -> ${toSymbolIcon}` : 'Conversion'
                 let embed = this._buildBaseResponse(conversion.lastUpdated)

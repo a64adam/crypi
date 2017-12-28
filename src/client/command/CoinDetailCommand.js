@@ -1,54 +1,66 @@
 const Discord = require('discord.js');
 const BaseCommand = require('./BaseCommand');
 const Constants = require('../../util/Constants');
-const IconUtil = require('../../util/IconUtil');
+const Util = require('../../util/Util');
 const logger = require('../../util/Logger');
 
 const tag = 'CoinDetailCommand';
 
+const btcEmoji = 'btc';
+const usdEmoji = '💵';
+
+const PriceFormat = Object.freeze({
+    USD: Symbol("USD"),
+    BTC: Symbol("BTC")
+});
+
 class CoinDetailCommand extends BaseCommand {
 
-    constructor(dataSource, msg, coinName, options) {
+    constructor(dataSource, msg, coinName) {
         super(msg);
 
         this.coinName = coinName;
-        this.options = options;
         this.dataSource = dataSource;
     }
 
-    run() {
-        logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
+    async run(options = {}) {
+        logger.info(`${logger.createTag(tag, this.msg.id)} ${options.reaction ? 'Editing' : 'Executing'} command.`);
 
-        this.dataSource.getCoin(this.coinName)
-            .then((coin) => {
-                let percentChange = coin.percentChangeDay;
-                if (percentChange[0] !== '-') {
-                    percentChange = '+' + percentChange;
-                }
+        let coin = await this.dataSource.getCoin(this.coinName);
 
-                let embed = this._buildBaseRepsonse(coin)
-                    .addField(`${coin.priceUSD} USD`, `Price`, true)
-                    .addField(`${percentChange}%`, 'Change (24h)', true);
+        let priceFormat;
+        if (options.reaction && options.reaction.emoji.name === btcEmoji) {
+            priceFormat = PriceFormat.BTC;
+        } else {
+            priceFormat = PriceFormat.USD;
+        }
 
-                this.msg.channel.send(embed);
+        let embed = this._buildBaseResponse(coin);
+        this._appendPriceData(embed, coin, priceFormat);
+        this._appendChangeData(embed, coin);
 
-                logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
-            })
-            .catch((error) => {
-                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: `, error);
-                this.msg.channel.send("Boo! I couldn't find that coin.");
-            });
+        if (options.reaction) {
+            await options.reaction.message.edit(embed);
+        } else {
+            let message = await this.msg.channel.send(embed);
+            await message.react(Util.iconForSymbol(this.msg.client, btcEmoji));
+            await message.react(usdEmoji);
+        }
+
+        logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
     }
 
     /**
+     * Builds a base RichEmbed object with default fields set for the message.
+     *
+     * @param {Coin} coin
+     * @returns {RichEmbed}
      * @private
-     * @param coin {Coin}
-     * @returns {"discord.js".RichEmbed}
      */
-    _buildBaseRepsonse(coin) {
+    _buildBaseResponse(coin) {
         let title = `${coin.name} (${coin.symbol})`;
 
-        let coinIcon = IconUtil.iconForSymbol(this.msg.client, coin.symbol);
+        let coinIcon = Util.iconForSymbol(this.msg.client, coin.symbol);
         if (coinIcon) {
             title = `${coinIcon} ${title}`;
         }
@@ -61,6 +73,41 @@ class CoinDetailCommand extends BaseCommand {
             .setColor(color)
             .setTitle(title)
             .setFooter(`Last updated: ${coin.lastUpdated.toUTCString()}`);
+    }
+
+    /**
+     * Appends the price data for the given coin to the RichEmbed in the provided price format.
+     *
+     * @param {RichEmbed} embed
+     * @param {Coin} coin
+     * @param {PriceFormat} priceFormat
+     * @private
+     */
+    _appendPriceData(embed, coin, priceFormat) {
+        switch (priceFormat) {
+            case PriceFormat.USD:
+                embed.addField(`${coin.priceUSD} USD`, `Price`, true);
+                break;
+            case PriceFormat.BTC:
+                embed.addField(`${coin.priceBTC} BTC`, `Price`, true);
+                break;
+        }
+    }
+
+    /**
+     * Appends the change data for the given coin to the RichEmbed.
+     *
+     * @param {RichEmbed} embed
+     * @param {Coin} coin
+     * @private
+     */
+    _appendChangeData(embed, coin) {
+        let percentChange = coin.percentChangeDay;
+        if (percentChange[0] !== '-') {
+            percentChange = '+' + percentChange;
+        }
+
+        embed.addField(`${percentChange}%`, 'Change (24h)', true);
     }
 }
 

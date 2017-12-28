@@ -14,7 +14,7 @@ class HelpCommand extends BaseCommand {
         super(msg);
     }
 
-    run() {
+    run(options = {}) {
         logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         let inviteTitle = 'Invite';

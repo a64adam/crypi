@@ -20,28 +20,18 @@ class MessageHandler {
      * @returns {BaseCommand|void}
      */
     static handleMessage(msg) {
-        if (msg.author.bot) {
+        if (msg.author.id !== msg.client.user.id && msg.author.bot) {
             // Ignore bot messages. Sorry, no bot-to-bot communication
+            return;
+        }
+
+        if (!this.isValidMessage(msg)) {
             return;
         }
 
         let content = msg.content.toLowerCase();
         let trigger, command, args;
         [trigger, command, ...args] = content.split(' ');
-
-        // Bot was mentioned
-        if (msg.isMentioned(msg.client.user)) {
-            // Only handle if the first component was the mention
-            let userId = msg.client.user.id;
-
-            if (!(trigger.length > userId.length && trigger.substring(2, trigger.length - 1) === userId)) {
-                logger.verbose(`${logger.createTag(tag, msg.id)} Ignoring bot @mention. Not used as trigger.`);
-                return;
-            }
-        } else if (!prefixes.includes(trigger)) {
-            logger.verbose(`${logger.createTag(tag, msg.id)} Message does not contain valid trigger, ignoring.`);
-            return;
-        }
 
         logger.info(`${logger.createTag(tag, msg.id)} Parsing message, [trigger: ${trigger}, command: ${command}, args: ${args}]`);
 
@@ -73,8 +63,29 @@ class MessageHandler {
             return new HelpCommand(msg);
         } else {
             // Coin details command, 'command' is the coin symbol
-            return new CoinDetailCommand(repo.coinRepo, msg, command, args);
+            return new CoinDetailCommand(repo.coinRepo, msg, command);
         }
+    }
+
+    static isValidMessage(msg) {
+        let trigger, ignore;
+        [trigger, ...ignore] = msg.content.split(' ');
+
+        // Bot was mentioned
+        if (msg.isMentioned(msg.client.user)) {
+            // Only handle if the first component was the mention
+            let userId = msg.client.user.id;
+
+            if (!(trigger.length > userId.length && trigger.substring(2, trigger.length - 1) === userId)) {
+                logger.verbose(`${logger.createTag(tag, msg.id)} Ignoring bot @mention. Not used as trigger.`);
+                return false;
+            }
+        } else if (!prefixes.includes(trigger)) {
+            logger.verbose(`${logger.createTag(tag, msg.id)} Message does not contain valid trigger, ignoring.`);
+            return false;
+        }
+
+        return true;
     }
 }
 

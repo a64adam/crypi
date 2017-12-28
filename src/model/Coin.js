@@ -9,6 +9,7 @@ class Coin {
         this.name = obj.name;
         this.symbol = obj.symbol;
         this.priceUSD = obj.price_usd;
+        this.priceBTC = obj.price_btc;
         this.percentChangeHour = obj.percent_change_1h;
         this.percentChangeDay = obj.percent_change_24h;
         this.percentChangeWeek = obj.percent_change_7d;
