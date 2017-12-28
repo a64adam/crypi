@@ -13,6 +13,10 @@ class CommandsCommand extends BaseCommand {
     }
 
     run(options = {}) {
+        if (options.reaction) {
+            return;
+        }
+
         logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         let embed = new Discord.RichEmbed()

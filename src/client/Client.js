@@ -10,7 +10,7 @@ const tag = '[Client]';
 const client = new Discord.Client();
 
 const onReaction = function(reaction, user) {
-    if (user.bot) {
+    if (reaction.message.author.id !== client.user.id) {
         return;
     }
 

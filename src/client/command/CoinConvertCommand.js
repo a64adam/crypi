@@ -19,6 +19,10 @@ class CoinConvertCommand extends BaseCommand {
     }
 
     run(options = {}) {
+        if (options.reaction) {
+            return;
+        }
+
         logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
         this.dataSource.getConversion(this.fromCoin, this.toCoin, this.amount)
