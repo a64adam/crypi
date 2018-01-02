@@ -23,8 +23,11 @@ class CommandsCommand extends BaseCommand {
             .setTitle('Crypi Commands')
             .setColor(Constants.EmbedOptions.color)
             .setDescription('All available are listed below. **[]** indicates optional fields.')
-            .addField('!crypi <symbol>', 'Price information about the provided symbol')
+            .addField('!crypi <symbol>', 'Price information about the provided symbol.')
             .addField('!crypi convert [amount] <symbol> to <symbol>', 'Converts the first symbol to the second symbol. Amount defaults to 1.0.')
+            .addField('!crypi list [limit]', 'Provides a list of coins. Limit defaults to 5, max is currently 20.')
+            .addField('!crypi help', 'Displays helpful information about Crypi.')
+            .addField('!crypi', 'Displays server stats.');
 
         logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
         this.msg.channel.send(embed);

@@ -13,6 +13,7 @@ class Coin {
         this.percentChangeHour = obj.percent_change_1h;
         this.percentChangeDay = obj.percent_change_24h;
         this.percentChangeWeek = obj.percent_change_7d;
+        this.marketCapUSD = obj.market_cap_usd;
         this._lastUpdated = obj.last_updated;
     }
 

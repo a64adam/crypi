@@ -2,6 +2,7 @@ const request = require('request');
 const logger = require('../util/Logger');
 const CoinCache = require('./CoinCache');
 const Coin = require('../model/Coin');
+const Constants = require('../util/Constants');
 
 const tag = '[CoinRepository]';
 const endpoint = 'https://api.coinmarketcap.com/v1/ticker/';
@@ -22,30 +23,21 @@ class CoinRepository {
     buildCoinMaps() {
         logger.verbose(`${tag} Building coin map...`);
 
-        let url = endpoint + '?limit=0';
-
-        logger.info(`${tag} Fetching coin mapping: [url: ${url}]`);
-        request.get(url, (error, response, body) => {
-            if (error) {
-                // TODO: Handle case where this fails...
-                logger.error(`${tag} Failed to fetch coin mapping.`);
-                return;
-            }
-
-            let jsonResponse = JSON.parse(body);
-
+        this._getCoins().then((coins) => {
             logger.info(`${tag} Successfully fetched coin mapping.`);
 
-            for (let key in jsonResponse) {
-                let coinId = jsonResponse[key].id;
-                let coinName = this._normalize(jsonResponse[key].name);
-                let coinSymbol = this._normalize(jsonResponse[key].symbol);
+            for (let coin in coins) {
+                let coinId = coins[coin].id;
+                let coinName = this._normalize(coins[coin].name);
+                let coinSymbol = this._normalize(coins[coin].symbol);
 
                 logger.silly(`${tag} Registered coin: [id: ${coinId}, name: ${coinName}, symbol: ${coinSymbol}]`);
 
                 this.symbolToIdMap[coinSymbol] = coinId;
                 this.nameToIdMap[coinName] = coinId;
             }
+        }).catch((error) => {
+            logger.error(`${tag} Failed to fetch coin mapping: ${error}`);
         });
     }
 
@@ -178,6 +170,77 @@ class CoinRepository {
 
                     logger.info(`${tag} Successfully fetched conversion data: `, data);
                     resolve(data);
+                }
+            });
+        });
+    }
+
+    getOrderedCoins(limit = 5) {
+        logger.info(`${tag} Fetching ordered coin list with limit of ${limit}`);
+
+        return new Promise((resolve, reject) => {
+
+            let pageSize = Constants.CacheOptions.pageSize;
+            let orderedCoins = [];
+
+            // Determine if cache has rankings already
+            let pageIndex = 0;
+            while (orderedCoins.length < limit) {
+                logger.verbose(`${tag} Searching cache for page ${pageIndex}`);
+                let tmpCoins = this.cache.getPage(pageIndex);
+
+                if (tmpCoins && tmpCoins.length >= Math.min(pageSize, limit)) {
+                    logger.verbose(`${tag} Found page ${pageIndex}. Appending to list`, orderedCoins);
+                    orderedCoins.push(...tmpCoins);
+                } else {
+                    logger.verbose(`${tag} Couldn't find page in cache, fetching from network`);
+                    orderedCoins = [];
+                    break;
+                }
+
+                pageIndex++;
+            }
+
+            if (orderedCoins.length > 0) {
+                logger.info(`${tag} Fetched ordered coin list from cache`, orderedCoins);
+                resolve(orderedCoins.slice(0, limit));
+            } else {
+                this._getCoins(limit).then((coins) => {
+                    let pageIndex = 0;
+
+                    for (let [idx, value] of coins.entries()) {
+                        let coin = new Coin(value);
+                        orderedCoins.push(coin);
+
+                        if ((idx + 1) % pageSize === 0) {
+                            let startIndex = pageIndex * pageSize;
+                            let endIndex = (pageIndex + 1) * pageSize;
+                            let orderedCoinsPage = orderedCoins.slice(startIndex, endIndex);
+
+                            this.cache.putPage(orderedCoinsPage, pageIndex);
+                            pageIndex++;
+                        }
+                    }
+
+                    logger.info(`${tag} Successfully fetched ordered coin list`, orderedCoins);
+                    resolve(orderedCoins);
+                }).catch((error) => {
+                    reject(error);
+                });
+            }
+        });
+    }
+
+    _getCoins(limit = 0) {
+        return new Promise(function(resolve, reject) {
+            let url = endpoint +`?limit=${limit}`;
+
+            request.get(url, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    let jsonResponse = JSON.parse(body);
+                    resolve(jsonResponse);
                 }
             });
         });

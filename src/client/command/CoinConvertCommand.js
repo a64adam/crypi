@@ -44,7 +44,7 @@ class CoinConvertCommand extends BaseCommand {
                 this.msg.channel.send(embed);
             })
             .catch((error) => {
-                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: ${error}`,);
+                logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: ${error}`);
                 this.msg.channel.send("Sorry! I'm not sure how to do that conversion.");
             });
     }

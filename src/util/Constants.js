@@ -3,3 +3,7 @@ module.exports.EmbedOptions = {
     positiveColor: '#4CAF50',
     negativeColor: '#F44336',
 };
+
+module.exports.CacheOptions = {
+    pageSize: 5,
+};

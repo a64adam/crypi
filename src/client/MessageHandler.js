@@ -4,6 +4,7 @@ const CoinConvertCommand = require('./command/CoinConvertCommand');
 const CommandsCommand = require('./command/CommandsComand');
 const HelpCommand = require('./command/HelpCommand');
 const EmptyCommand = require('./command/EmptyCommand');
+const ListCommand = require('./command/ListCommand');
 const logger = require('../util/Logger');
 const repo = require('../data/CoinRepository');
 
@@ -61,6 +62,8 @@ class MessageHandler {
             return new CommandsCommand(msg);
         } else if ('help' === command) {
             return new HelpCommand(msg);
+        } else if ('list' === command) {
+            return new ListCommand(repo.coinRepo, msg, args[0]);
         } else {
             // Coin details command, 'command' is the coin symbol
             return new CoinDetailCommand(repo.coinRepo, msg, command);
