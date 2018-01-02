@@ -6,14 +6,6 @@ const logger = require('../../util/Logger');
 
 const tag = 'CoinDetailCommand';
 
-const btcEmoji = 'btc';
-const usdEmoji = '💵';
-
-const PriceFormat = Object.freeze({
-    USD: Symbol("USD"),
-    BTC: Symbol("BTC")
-});
-
 class CoinDetailCommand extends BaseCommand {
 
     constructor(dataSource, msg, coinName) {
@@ -23,31 +15,20 @@ class CoinDetailCommand extends BaseCommand {
         this.dataSource = dataSource;
     }
 
-    async run(options = {}) {
-        logger.info(`${logger.createTag(tag, this.msg.id)} ${options.reaction ? 'Editing' : 'Executing'} command.`);
+    run(options = {}) {
+        logger.info(`${logger.createTag(tag, this.msg.id)} Executing command.`);
 
-        let coin = await this.dataSource.getCoin(this.coinName);
+        this.dataSource.getCoin(this.coinName).then((coin) => {
+            let embed = this._buildBaseResponse(coin);
+            this._appendPriceData(embed, coin);
+            this._appendChangeData(embed, coin);
 
-        let priceFormat;
-        if (options.reaction && options.reaction.emoji.name === btcEmoji) {
-            priceFormat = PriceFormat.BTC;
-        } else {
-            priceFormat = PriceFormat.USD;
-        }
-
-        let embed = this._buildBaseResponse(coin);
-        this._appendPriceData(embed, coin, priceFormat);
-        this._appendChangeData(embed, coin);
-
-        if (options.reaction) {
-            await options.reaction.message.edit(embed);
-        } else {
-            let message = await this.msg.channel.send(embed);
-            await message.react(Util.iconForSymbol(this.msg.client, btcEmoji));
-            await message.react(usdEmoji);
-        }
-
-        logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
+            this.msg.channel.send(embed);
+            logger.info(`${logger.createTag(tag, this.msg.id)} Completed command.`);
+        }).catch((error) => {
+            logger.error(`${logger.createTag(tag, this.msg.id)} Failed to complete command: ${error}`,);
+            this.msg.channel.send("Boo! I couldn't find that coin.");
+        });
     }
 
     /**
@@ -80,18 +61,10 @@ class CoinDetailCommand extends BaseCommand {
      *
      * @param {RichEmbed} embed
      * @param {Coin} coin
-     * @param {PriceFormat} priceFormat
      * @private
      */
-    _appendPriceData(embed, coin, priceFormat) {
-        switch (priceFormat) {
-            case PriceFormat.USD:
-                embed.addField(`${coin.priceUSD} USD`, `Price`, true);
-                break;
-            case PriceFormat.BTC:
-                embed.addField(`${coin.priceBTC} BTC`, `Price`, true);
-                break;
-        }
+    _appendPriceData(embed, coin) {
+        embed.addField(`Price`, `**${coin.priceUSD}** USD\n${coin.priceBTC} BTC`, true);
     }
 
     /**
@@ -107,7 +80,7 @@ class CoinDetailCommand extends BaseCommand {
             percentChange = '+' + percentChange;
         }
 
-        embed.addField(`${percentChange}%`, 'Change (24h)', true);
+        embed.addField(`Change (24h)`, `**${percentChange}**%`, true);
     }
 }
 

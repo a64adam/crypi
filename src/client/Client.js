@@ -9,22 +9,6 @@ const tag = '[Client]';
 
 const client = new Discord.Client();
 
-const onReaction = function(reaction, user) {
-    if (user.bot || reaction.message.author.id !== client.user.id) {
-        return;
-    }
-
-    let channel = reaction.message.channel;
-    channel.fetchMessages({limit: 5, before: reaction.message.id}).then((messages) => {
-        let commandMessages = messages.filterArray((message) => {
-            return handler.isValidMessage(message);
-        });
-
-        let command = handler.handleMessage(commandMessages[0]);
-        if (command) command.run({ reaction: reaction });
-    });
-};
-
 client.on('ready', () => {
     logger.info(`${tag} Connected as ${client.user.tag}!`);
 
@@ -50,8 +34,5 @@ client.on('message', msg => {
 
     command.run();
 });
-
-client.on('messageReactionAdd', (reaction, user) => onReaction(reaction, user));
-client.on('messageReactionRemove', (reaction, user) => onReaction(reaction, user));
 
 client.login(auth.token);
